@@ -2,8 +2,10 @@ from requests import get
 from pandas import DataFrame
 import os
 from flask import Flask, make_response, jsonify, request
+from configparser import ConfigParser
 
-app = Flask(__name__)
+config = ConfigParser()
+config.read('config.ini')
 
 
 def convert_dict_format(movidesk_response):
@@ -15,6 +17,9 @@ def convert_dict_format(movidesk_response):
     grafana_response = [{'columns': columns, 'rows': rows}]
 
     return grafana_response
+
+
+app = Flask(__name__)
 
 
 @app.after_request
@@ -53,7 +58,7 @@ def query_request():
 
     if query_type == 'table':
         targets = query_data['targets'][0]
-        params = {'token': f"{os.environ['MOVIEDESKTOKEN']}",
+        params = {'token': f"{config['movidesk']['API_TOKEN']}",
                   '$select': f'{targets["target"]}',
                   '$filter': 'createdDate gt 2016-09-01T00:00:00.00z'}
         url = 'https://api.movidesk.com/public/v1/tickets'
@@ -74,4 +79,4 @@ def annotation_request():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, threaded=True)
+    app.run(debug=True, port=config['movidesk']['PORT'], threaded=True)
