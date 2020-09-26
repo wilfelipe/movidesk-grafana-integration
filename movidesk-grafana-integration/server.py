@@ -1,6 +1,5 @@
 from requests import get
 from pandas import DataFrame
-import os
 from flask import Flask, make_response, jsonify, request
 from configparser import ConfigParser
 
@@ -61,10 +60,10 @@ def query_request():
         params = {'token': f"{config['movidesk']['API_TOKEN']}",
                   '$select': f'{targets["target"]}',
                   '$filter': 'createdDate gt 2016-09-01T00:00:00.00z'}
-        url = 'https://api.movidesk.com/public/v1/tickets'
-        response = get(url, params).json()
 
-    elif query_type == 'timeserie':  # Se query igual a timeseries
+        response = get(config['movidesk']['API_DOMAIN'], params).json()
+
+    elif query_type == 'timeserie':
         pass
 
     movidesk_response = convert_dict_format(response)
