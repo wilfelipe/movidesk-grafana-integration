@@ -15,8 +15,8 @@ comparasion_translate = {
 
 def convert_dict_format(movidesk_response):
     df = DataFrame(movidesk_response)
+    df = df[df.columns[::-1]]
     columns = list(df.columns)
-    columns.reverse()
     types = [df[column].dtype.name for column in columns]
     columns = [{'text': text, 'type': dtype} for text, dtype in tuple(zip(columns, types))]
     rows = [row.tolist() for row in df.values]
@@ -44,7 +44,7 @@ def test_request():
 @app.route('/search', methods=['GET', 'POST'])
 def search_request():
     my_dropdown_items = []
-    query_data = request.get_json()
+    #query_data = request.get_json()
     return make_response(jsonify(my_dropdown_items))
 
 
