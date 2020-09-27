@@ -6,6 +6,12 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config.ini')
 
+comparasion_translate = {
+    '=': 'eq',
+    '!=': 'ne',
+    '>': 'gt',
+    '<': 'lt'
+}
 
 def convert_dict_format(movidesk_response):
     df = DataFrame(movidesk_response)
@@ -37,14 +43,7 @@ def test_request():
 @app.route('/search', methods=['GET', 'POST'])
 def search_request():
     my_dropdown_items = []
-    query_data = request.get_json()
-
-    if query_data.get('target') == "server_list":
-        my_dropdown_items += ['here', 'are', 'some', 'things', 'for', 'the', 'dropdowns']
-
-    elif query_data.get('target') == "server_values":
-        my_dropdown_items += [{'text': 'here', 'value': 'key1'}, {'text': 'another', 'value': 'key2'}]
-
+    #query_data = request.get_json()
     return make_response(jsonify(my_dropdown_items))
 
 
@@ -59,7 +58,13 @@ def query_request():
         targets = query_data['targets'][0]
         params = {'token': f"{config['movidesk']['API_TOKEN']}",
                   '$select': f'{targets["target"]}',
-                  '$filter': 'createdDate gt 2016-09-01T00:00:00.00z'}
+                  '$filter': f'createdDate ge {query_data["range"]["from"]} '
+                             f'and createdDate le {query_data["range"]["to"]}'}
+
+        for filtro in query_data['adhocFilters']:
+            params['$filter'] += f' and {filtro["key"]} ' \
+                                 f'{comparasion_translate[filtro["operator"]]} ' \
+                                 f"'{filtro['value']}'"
 
         response = get(config['movidesk']['API_DOMAIN'], params).json()
 
@@ -68,6 +73,7 @@ def query_request():
 
     movidesk_response = convert_dict_format(response)
     movidesk_response[0]['type'] = query_type
+    print(movidesk_response)
     return make_response(jsonify(movidesk_response))
 
 
