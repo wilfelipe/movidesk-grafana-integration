@@ -86,4 +86,4 @@ def annotation_request():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=config['movidesk']['PORT'], threaded=True)
+    app.run(debug=True, port=config['movidesk']['PORT'], threaded=True, host='0.0.0.0')
