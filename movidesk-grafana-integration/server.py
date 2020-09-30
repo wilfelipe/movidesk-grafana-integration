@@ -62,9 +62,12 @@ def query_request():
                              f'and createdDate le {query_data["range"]["to"]}'}
 
         for filtro in query_data['adhocFilters']:
-            params['$filter'] += f' and {filtro["key"]} ' \
-                                 f'{comparasion_translate[filtro["operator"]]} ' \
-                                 f"'{filtro['value']}'"
+            if filtro["operator"] == "=":
+                params['$filter'] += f" and contains({filtro['key']}, '{filtro['value']}')"
+            else:
+                params['$filter'] += f' and {filtro["key"]} ' \
+                                     f'{comparasion_translate[filtro["operator"]]} ' \
+                                     f"'{filtro['value']}'"
 
         response = get(config['movidesk']['API_DOMAIN'], params).json()
 
@@ -73,7 +76,6 @@ def query_request():
 
     movidesk_response = convert_dict_format(response)
     movidesk_response[0]['type'] = query_type
-    print(movidesk_response)
     return make_response(jsonify(movidesk_response))
 
 
