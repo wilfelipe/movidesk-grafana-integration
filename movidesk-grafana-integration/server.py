@@ -62,10 +62,14 @@ def query_request():
                              f'and createdDate le {query_data["range"]["to"]}'}
 
         for filtro in query_data['adhocFilters']:
-            if filtro["operator"] == "=":
-                params['$filter'] += f" and contains({filtro['key']}, '{filtro['value']}')"
+            if "condition" in filtro:
+                condition = filtro['condition']
             else:
-                params['$filter'] += f' and {filtro["key"]} ' \
+                condition = 'AND'
+            if filtro["operator"] == "=":
+                params['$filter'] += f" {condition} contains({filtro['key']}, '{filtro['value']}')"
+            else:
+                params['$filter'] += f' {condition} {filtro["key"]} ' \
                                      f'{comparasion_translate[filtro["operator"]]} ' \
                                      f"'{filtro['value']}'"
 
@@ -76,6 +80,7 @@ def query_request():
 
     movidesk_response = convert_dict_format(response)
     movidesk_response[0]['type'] = query_type
+    print(movidesk_response)
     return make_response(jsonify(movidesk_response))
 
 
@@ -84,6 +89,15 @@ def annotation_request():
     resp = make_response([])
     return jsonify(resp)
 
+@app.route('/tag-keys', methods=['GET', 'POST'])
+def tagKeys():
+    resp = ''
+    return make_response(jsonify(resp))
+
+@app.route('/tag-values', methods=['GET', 'POST'])
+def tagValues():
+    resp = ''
+    return make_response(jsonify(resp))
 
 if __name__ == "__main__":
     app.run(debug=True, port=config['movidesk']['PORT'], threaded=True)
